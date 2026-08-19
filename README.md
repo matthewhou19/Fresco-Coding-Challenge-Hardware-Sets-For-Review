@@ -33,16 +33,18 @@ python pipeline/step3c_checks.py data/out/step3
 
 ## Running it
 
-Python 3.13; dependency versions are pinned.
+Python 3.13 — what this was built and verified on; the pinned dependencies declare 3.10 as their floor.
 
 ```bash
 python -m venv .venv
-source .venv/bin/activate       # Windows: source .venv/Scripts/activate
+source .venv/bin/activate       # Windows: .venv\Scripts\Activate.ps1 (PowerShell)
 pip install -r requirements.txt
 ```
 
-Put a project's specbook PDFs in `pdfs/<project>/`, then run the six steps. Step 1 takes one project
-folder at a time; the rest walk the whole tree.
+Neither `pdfs/` nor `data/` is in git — the specbooks are not mine to redistribute, and everything
+under `data/out/` is reproducible from them — so a fresh clone starts empty. Put a project's specbook
+PDFs in `pdfs/<project>/`, then run the six steps. Step 1 takes one project folder at a time; the
+rest walk the whole tree. Every `--out` below is that step's default and can be dropped.
 
 ```bash
 python pipeline/step1_locate.py "pdfs/<project>" --out data/out/step1                           # region location
@@ -66,10 +68,44 @@ Assembly calls the Anthropic API (`claude-opus-5`); put `ANTHROPIC_API_KEY` in t
 `.env` file (see `.env.example`) — the first five steps need no key. Every model response is cached on
 disk, so a book already under `data/out` re-runs offline at no cost; on an uncached book the five
 deterministic steps take about 3 s for a 344-page manual and assembly spends one model call per set
-block (Forest Park School: 1 call, 2,592 in / 682 out tokens).
+block (Forest Park School: 1 call, 2,592 in / 682 out tokens). Cold over the whole corpus here that
+came to 1,272 calls, 4,721,872 input and 1,939,247 output tokens.
 
-Four environment variables: `FRESCO_DATA_ROOT` (where the viewer reads products), `FRESCO_PAGE_CACHE`
-(page-image cache), `HOST` and `PORT` (bind address).
+The seven check suites are offline and free; each prints PASS/FAIL per fact and exits 1 on failure:
+
+```bash
+python pipeline/step1_checks.py
+python pipeline/step1p5_checks.py
+python pipeline/step2_checks.py
+python pipeline/step3_checks.py
+python pipeline/step3b_checks.py
+python pipeline/step3c_checks.py
+python pipeline/server_checks.py
+```
+
+`server_checks.py` is the one about serving rather than accuracy: discovery finds every stream the
+pipeline produced, counts match an independent recount straight off the JSONL, every component anchor
+resolves to a real box on a page the set claims, page PNGs come back byte-identical on a second call,
+and an upload deletes whole — pdf, output and model cache — without touching the corpus tree.
+
+Each of the first three steps also has a view tool. `dump` writes a text view beside the file;
+`overlay` renders a page with the boxes drawn on it, which is the honest test of the location layer:
+
+```bash
+python pipeline/step2_view.py overlay data/out/step2/<project>/<stream>.blocks.jsonl 285
+```
+
+The API under the viewer is small: `/api/streams` lists the extracted regions,
+`/api/streams/{project}/{stream}` returns one stream's sets with their boxes, and
+`/api/streams/{project}/{stream}/export.json` is the delivered JSON that the Export button downloads.
+
+Four environment variables:
+
+| Variable | Default | Meaning |
+|---|---|---|
+| `FRESCO_DATA_ROOT` | walks up from `server/catalog.py` to the first directory holding `data/out/step3` | Where the viewer reads products |
+| `FRESCO_PAGE_CACHE` | `<root>/data/out/server_cache` | Page-image cache |
+| `HOST` / `PORT` | `127.0.0.1` / `8000` | Bind address |
 
 Deployed: _(link to be added)_
 
