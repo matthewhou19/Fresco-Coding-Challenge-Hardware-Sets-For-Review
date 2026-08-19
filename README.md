@@ -33,8 +33,6 @@ python pipeline/step3c_checks.py data/out/step3
 Python 3.13 — what this was built and verified on; the pinned dependencies declare 3.10 as their floor.
 
 ```bash
-python -m venv .venv
-source .venv/bin/activate       # Windows: .venv\Scripts\Activate.ps1 (PowerShell)
 pip install -r requirements.txt
 cp .env.example .env            # then put your ANTHROPIC_API_KEY in it
 python server/app.py
@@ -60,20 +58,18 @@ Deployed: _(link to be added)_
 
 ## What's next
 
-- **Accuracy against a hand-labeled ground truth** is the main gap: every specbook here informed the
-  rules, so a number measured on them would report fit rather than generalization — the meaningful
-  version needs specbooks the system has never seen.
-- **Per-page column intervals.** Column spans are induced per stream, so a stream mixing prose pages
-  with tables loses its column evidence and those components ship with `null` mechanical fields
-  (StarHardware, 32 traced). The induction already clusters by page — it needs to key on the page.
-- **Deployed link.** The server is read-only — JSONL plus page rendering, no key, no network — so what
-  remains is baking a few books' products and pre-rendered pages into an image behind `FRESCO_DATA_ROOT`.
-- **Feedback UI.** The viewer reads and accepts uploads; writing a correction back is not built.
-- **Letter-spaced text.** One book prints rows with widened character spacing, so words arrive split
-  into fragments the assembler only partly rejoins (SJC Well Behavioral); the fix is stitching
-  characters by gap width in step 1.
-- **Vocabulary hygiene.** Induced finish vocabularies still admit division numbers (`08`/`13`/`24`/`28`);
-  delivery is covered by the column rejection above, but induction should drop them by coordinate.
-- **Cosmetic leaks.** `---` placeholders stick to catalog numbers and notes, and `As Req.` in a
-  quantity cell reaches the description instead of becoming `qty: null` plus a note. Separately, The
-  Door Company prints 90 descriptions in the catalog column; that mismatch is recorded, no field moved.
+I used every book in that folder, so I have no held-out number: every specbook here informed the
+rules, and a number measured on them would report fit rather than generalization. What I do have is
+what each new book cost me — one dialect rule each time, never an architecture change.
+
+Three things next.
+
+- **The variance wall is set headers.** Every new book still costs a rule for how its set headers
+  look. Finding the set blocks is the one place I would put a model.
+- **One reader handles every book today.** It should sort the layout into classes first, then hand
+  each class to a reader built for it — tabular schedules first, the format this handles worst.
+- **Columns still bleed.** The zones are a patch on a line-based model. The real fix is to address the
+  page by cell, not by line (StarHardware: 32 components ship with `null` mechanical fields).
+
+Two walls at the start: location and variance. Location is solved, structurally. Variance I have
+handled one dialect at a time — that is where the model goes next.
