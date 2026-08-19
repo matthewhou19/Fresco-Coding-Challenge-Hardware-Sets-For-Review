@@ -1,7 +1,8 @@
-# Serving the extraction results needs four packages -- not the extractor's
+# Serving the extraction results needs five packages -- not the extractor's
 # own stack (pdfplumber, anthropic): the pipeline runs offline and the server
 # only reads its JSONL output and renders pages.
 fastapi==0.141.1
 uvicorn[standard]==0.52.3
+python-multipart==0.0.32
 pypdfium2==5.13.0
 pillow==12.3.0
