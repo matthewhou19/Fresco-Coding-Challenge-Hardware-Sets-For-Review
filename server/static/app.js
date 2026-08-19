@@ -53,13 +53,15 @@ async function init() {
   el("zoom-in").onclick = () => setZoom(state.zoom + 1);
   el("zoom-out").onclick = () => setZoom(state.zoom - 1);
 
+  el("stream-stats").textContent =
+    `${health.n_streams} specbooks · ${health.n_sets} sets · ${health.n_components} components`;
+  if (!state.streams.length) return showEmptyCatalog();
+
   const want = new URLSearchParams(location.hash.slice(1));
   const first = want.get("stream") && state.streams.some((s) => s.id === want.get("stream"))
     ? want.get("stream") : state.streams[0].id;
   sel.value = first;
   await loadStream(first, Number(want.get("set")) || null);
-  el("stream-stats").textContent =
-    `${health.n_streams} specbooks · ${health.n_sets} sets · ${health.n_components} components`;
 }
 
 async function loadStream(id, wantSeq = null) {
@@ -74,11 +76,34 @@ async function loadStream(id, wantSeq = null) {
   selectSet(sets.find((s) => s.seq === wantSeq) || sets[0]);
 }
 
+/* Nothing extracted yet: a fresh checkout before the funnel has run, or the
+ * last upload just deleted. Say so in place and leave the page standing --
+ * uploading a PDF is how you leave this state, and the upload path renders
+ * into the same DOM. */
+function showEmptyCatalog() {
+  state.stream = null;
+  state.set = null;
+  renderSetList();
+  el("set-head").innerHTML =
+    "<h1>No specbooks yet</h1><span>Upload a PDF to run the funnel on it.</span>";
+  el("delete-btn").hidden = true;
+  el("components").innerHTML = "";
+  el("extras").innerHTML = "";
+  el("page-tabs").innerHTML = "";
+  el("overlay").innerHTML = "";
+  el("page-img").removeAttribute("src");
+  el("page-note").textContent = "";
+}
+
 /* ---------- set list ---------- */
 
 function renderSetList() {
-  const q = el("set-filter").value.trim().toLowerCase();
   const list = el("set-list");
+  if (!state.stream) {
+    list.innerHTML = '<li class="empty-state">no specbooks yet</li>';
+    return;
+  }
+  const q = el("set-filter").value.trim().toLowerCase();
   const rows = state.stream.sets.filter((s) => !q ||
     (`${s.set_number} ${s.description ?? ""} ${s.header_text ?? ""}`).toLowerCase().includes(q));
 
@@ -145,9 +170,12 @@ async function deleteUpload() {
   }
   el("job-panel").hidden = true;
   await loadStreamList();
-  const next = state.streams[0].id;
-  el("stream-select").value = next;
-  await loadStream(next);
+  if (state.streams.length) {
+    el("stream-select").value = state.streams[0].id;
+    await loadStream(state.streams[0].id);
+  } else {
+    showEmptyCatalog();
+  }
   const h = await api("/api/health");
   el("stream-stats").textContent =
     `${h.n_streams} specbooks · ${h.n_sets} sets · ${h.n_components} components`;
@@ -269,7 +297,7 @@ function setZoom(i) {
 }
 
 function drawBoxes() {
-  const dim = state.stream.pages[state.page];
+  const dim = state.stream?.pages[state.page];
   const overlay = el("overlay");
   if (!dim) { overlay.innerHTML = ""; return; }
 
