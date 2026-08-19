@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Hardware set extractor</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header class="topbar">
+  <div class="brand">
+    <strong>Hardware sets</strong>
+    <span class="muted">Division 08 specbooks &rarr; structured sets</span>
+  </div>
+  <label class="picker">
+    <span class="muted">Specbook</span>
+    <select id="stream-select"></select>
+  </label>
+  <div id="stream-stats" class="stats muted"></div>
+  <button id="upload-btn" class="btn">Upload PDF</button>
+  <button id="delete-btn" class="btn danger" hidden>Delete this upload</button>
+  <input id="upload-input" type="file" accept="application/pdf,.pdf" hidden>
+  <a id="export-link" class="btn" href="#" download>Export JSON</a>
+</header>
+
+<div id="job-panel" class="job-panel" hidden>
+  <div class="job-head">
+    <strong id="job-title"></strong>
+    <button id="job-close" title="hide">&times;</button>
+  </div>
+  <ol id="job-stages" class="job-stages"></ol>
+  <pre id="job-log" class="job-log"></pre>
+  <div id="job-foot"></div>
+</div>
+
+<main>
+  <aside class="rail">
+    <input id="set-filter" type="search" placeholder="Filter sets…" autocomplete="off">
+    <ul id="set-list" class="set-list"></ul>
+  </aside>
+
+  <section class="detail">
+    <div id="set-head" class="set-head"></div>
+    <div class="panes">
+      <div class="pane page-pane">
+        <div class="pane-bar">
+          <div id="page-tabs" class="tabs"></div>
+          <div class="tabs zoom">
+            <button id="zoom-out" title="zoom out">−</button>
+            <span id="zoom-level">100%</span>
+            <button id="zoom-in" title="zoom in">+</button>
+          </div>
+          <label class="ghost-toggle">
+            <input type="checkbox" id="show-all"> show other sets on page
+          </label>
+        </div>
+        <div id="page-wrap" class="page-wrap">
+          <img id="page-img" alt="specbook page">
+          <div id="overlay" class="overlay"></div>
+        </div>
+        <p id="page-note" class="muted small"></p>
+      </div>
+
+      <div class="pane data-pane">
+        <div id="components"></div>
+        <div id="extras"></div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<script src="app.js"></script>
+</body>
+</html>
