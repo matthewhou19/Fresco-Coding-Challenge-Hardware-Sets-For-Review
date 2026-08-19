@@ -51,10 +51,7 @@ call per set block — `ANTHROPIC_API_KEY` in the environment works in place of 
 before it need no key and take about 3 s on a 344-page manual (Forest Park School: 1 call, 2,592 in /
 682 out tokens).
 
-`FRESCO_DATA_ROOT` points the viewer at another data directory — that is the deploy knob;
-`FRESCO_PAGE_CACHE` moves the page-image cache; `HOST` and `PORT` set the bind address.
 
-Deployed: _(link to be added)_
 
 ## What's next
 
@@ -69,7 +66,5 @@ Three things next.
 - **One reader handles every book today.** It should sort the layout into classes first, then hand
   each class to a reader built for it — tabular schedules first, the format this handles worst.
 - **Columns still bleed.** The zones are a patch on a line-based model. The real fix is to address the
-  page by cell, not by line (StarHardware: 32 components ship with `null` mechanical fields).
+  page by cell, not by line 
 
-Two walls at the start: location and variance. Location is solved, structurally. Variance I have
-handled one dialect at a time — that is where the model goes next.
