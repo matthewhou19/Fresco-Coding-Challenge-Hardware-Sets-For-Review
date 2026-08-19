@@ -36,60 +36,25 @@ Python 3.13 — what this was built and verified on; the pinned dependencies dec
 python -m venv .venv
 source .venv/bin/activate       # Windows: .venv\Scripts\Activate.ps1 (PowerShell)
 pip install -r requirements.txt
-```
-
-
-Then start the viewer and open <http://127.0.0.1:8000>:
-
-```bash
+cp .env.example .env            # then put your ANTHROPIC_API_KEY in it
 python server/app.py
 ```
 
-Pick a book and a set, see the set framed on the rendered page, click a component row to highlight
-the line it came from, download the delivered JSON, or upload a new PDF and watch it run all six steps.
+Open <http://127.0.0.1:8000> and press **Upload PDF**. That is the whole flow: neither `pdfs/` nor
+`data/` is in git, so a fresh clone starts with an empty list and the upload is how a book gets in. It
+runs all six steps, one stage at a time with the log on screen, and the book lands in the list when it
+finishes — or it stops at step 1 and reports the alarm, if the book has no schedule to find. Then pick
+a set to see it framed on the rendered page, click a component row to highlight the line it came from,
+**Export JSON** for the delivered record, **Delete this upload** to remove the book whole — pdf, output
+and model cache.
 
-Assembly calls the Anthropic API (`claude-opus-5`); put `ANTHROPIC_API_KEY` in the environment or a
-`.env` file (see `.env.example`) — the first five steps need no key. Every model response is cached on
-disk, so a book already under `data/out` re-runs offline at no cost; on an uncached book the five
-deterministic steps take about 3 s for a 344-page manual and assembly spends one model call per set
-block (Forest Park School: 1 call, 2,592 in / 682 out tokens). Cold over the whole corpus here that
-came to 1,272 calls, 4,721,872 input and 1,939,247 output tokens.
+That key is what the sixth step needs: assembly calls the Anthropic API (`claude-opus-5`), one model
+call per set block — `ANTHROPIC_API_KEY` in the environment works in place of the file. The five steps
+before it need no key and take about 3 s on a 344-page manual (Forest Park School: 1 call, 2,592 in /
+682 out tokens).
 
-The seven check suites are offline and free; each prints PASS/FAIL per fact and exits 1 on failure:
-
-```bash
-python pipeline/step1_checks.py
-python pipeline/step1p5_checks.py
-python pipeline/step2_checks.py
-python pipeline/step3_checks.py
-python pipeline/step3b_checks.py
-python pipeline/step3c_checks.py
-python pipeline/server_checks.py
-```
-
-`server_checks.py` is the one about serving rather than accuracy: discovery finds every stream the
-pipeline produced, counts match an independent recount straight off the JSONL, every component anchor
-resolves to a real box on a page the set claims, page PNGs come back byte-identical on a second call,
-and an upload deletes whole — pdf, output and model cache — without touching the corpus tree.
-
-Each of the first three steps also has a view tool. `dump` writes a text view beside the file;
-`overlay` renders a page with the boxes drawn on it, which is the honest test of the location layer:
-
-```bash
-python pipeline/step2_view.py overlay data/out/step2/<project>/<stream>.blocks.jsonl 285
-```
-
-The API under the viewer is small: `/api/streams` lists the extracted regions,
-`/api/streams/{project}/{stream}` returns one stream's sets with their boxes, and
-`/api/streams/{project}/{stream}/export.json` is the delivered JSON that the Export button downloads.
-
-Four environment variables:
-
-| Variable | Default | Meaning |
-|---|---|---|
-| `FRESCO_DATA_ROOT` | walks up from `server/catalog.py` to the first directory holding `data/out/step3` | Where the viewer reads products |
-| `FRESCO_PAGE_CACHE` | `<root>/data/out/server_cache` | Page-image cache |
-| `HOST` / `PORT` | `127.0.0.1` / `8000` | Bind address |
+`FRESCO_DATA_ROOT` points the viewer at another data directory — that is the deploy knob;
+`FRESCO_PAGE_CACHE` moves the page-image cache; `HOST` and `PORT` set the bind address.
 
 Deployed: _(link to be added)_
 
