@@ -12,11 +12,8 @@ one per step, produce it.
 **Manufacturer and finish codes are told apart by position, not by value.** A PDF gives every word an
 exact left edge, so each stream induces the horizontal interval its columns occupy, and a short code
 is accepted as `mfr` or `finish` only when it lands inside that column's span. Vocabulary — the
-book's legend plus the column layout induced from that same book — sets confidence rather than
-membership; semantics only splits fields within a column. A value outside its column is rejected, and
-the rejection stays in the record (483 corpus-wide). So `CA` is delivered as a finish 126 times and a
-manufacturer twice, the finish column carries `630`/`US32D`/`US26D` while the manufacturer column
-carries `IVE`/`SCH`/`LCN`, and `PE` resolves to Pemko in all 318 places it appears here.
+book's legend plus the column layout induced from that same book, sets confidence rather than
+membership; semantics only splits fields within a column.
 
 Across 20 specbooks (42 PDFs, 16,177 pages) it extracts **1,295 hardware sets and 11,358
 components**; 23 of those sets are NOT USED headers that legitimately carry none. One book has no
@@ -24,7 +21,7 @@ schedule at all — its Division 08 section makes the schedule a contractor shop
 it returns an empty result plus an alarm naming every rejected region. That is the right answer.
 
 How I check correctness: the same input run twice reproduces all 2,249 products byte for byte, and
-747 assertions across seven `*_checks.py` suites hold the output against facts I confirmed by hand in
+747 assertions across seven `*_checks.py` suites hold the output against facts I confirmed in
 the PDFs. The largest suite:
 
 ```bash
@@ -41,19 +38,6 @@ source .venv/bin/activate       # Windows: .venv\Scripts\Activate.ps1 (PowerShel
 pip install -r requirements.txt
 ```
 
-Neither `pdfs/` nor `data/` is in git — the specbooks are not mine to redistribute, and everything
-under `data/out/` is reproducible from them — so a fresh clone starts empty. Put a project's specbook
-PDFs in `pdfs/<project>/`, then run the six steps. Step 1 takes one project folder at a time; the
-rest walk the whole tree. Every `--out` below is that step's default and can be dropped.
-
-```bash
-python pipeline/step1_locate.py "pdfs/<project>" --out data/out/step1                           # region location
-python pipeline/step1p5_roles.py data/out/step1 --out data/out/step1p5                          # line roles
-python pipeline/step2_chunk.py data/out/step1p5 --out data/out/step2                            # chunking
-python pipeline/step3_dossier.py data/out/step2 --out data/out/step3                            # per-book dossier
-python pipeline/step3_rules.py data/out/step2 --dossiers data/out/step3 --out data/out/step3    # field rules
-python pipeline/step3c_assemble.py data/out/step3 --blocks data/out/step2 --out data/out/step3  # assembly
-```
 
 Then start the viewer and open <http://127.0.0.1:8000>:
 
