@@ -84,8 +84,9 @@ Deployed: _(link to be added)_
 - **Deployed link.** The server is read-only — JSONL plus page rendering, no key, no network — so what
   remains is baking a few books' products and pre-rendered pages into an image behind `FRESCO_DATA_ROOT`.
 - **Feedback UI.** The viewer reads and accepts uploads; writing a correction back is not built.
-- **Letter-spaced text.** One book prints ~90 rows with widened character spacing that shatters words
-  into fragments (SJC Well Behavioral); the fix is stitching characters by gap width in step 1.
+- **Letter-spaced text.** One book prints rows with widened character spacing, so words arrive split
+  into fragments the assembler only partly rejoins (SJC Well Behavioral); the fix is stitching
+  characters by gap width in step 1.
 - **Vocabulary hygiene.** Induced finish vocabularies still admit division numbers (`08`/`13`/`24`/`28`);
   delivery is covered by the column rejection above, but induction should drop them by coordinate.
 - **Cosmetic leaks.** `---` placeholders stick to catalog numbers and notes, and `As Req.` in a
